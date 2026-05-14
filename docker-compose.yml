@@ -9,11 +9,12 @@
 # Find the current name on the host with:
 #   docker inspect <container> --format '{{json .Config.Labels}}' | jq | grep routers
 #
-# The Basic Auth htpasswd hash is inlined here with every $ doubled to
-# $$ — that's how Docker Compose escapes a literal $. Generate a new one
-# with `htpasswd -nbB admin 'senha'` and double the dollar signs before
-# pasting. Coolify env vars are NOT interpolated into Traefik labels in
-# this setup, which is why the value is inlined instead of referenced.
+# The Basic Auth htpasswd hash is inlined here. In this Coolify setup
+# the $ must be SINGLE (not the usual $$ Compose escape) — Coolify does
+# not unescape $$ before handing labels to Traefik, so doubling breaks
+# the hash. Generate a new one with `htpasswd -nbB admin 'senha'` and
+# paste the raw output verbatim. Env vars are not interpolated into
+# Traefik labels in this setup, which is why the value is inlined.
 #
 # Network `coolify` is the shared external network where the Coolify-managed
 # Postgres lives — joining it lets DNS resolve the DB by its UUID hostname.
@@ -41,7 +42,7 @@ services:
       retries: 10
       start_period: 180s
     labels:
-      - "traefik.http.middlewares.mastra-auth.basicauth.users=admin:$$2y$$05$$76yVNDZ3AinkC6zhTnp3Iu5TPSslJlketySdAQQPp5UTjHvZWhCOW"
+      - "traefik.http.middlewares.mastra-auth.basicauth.users=admin:$2y$05$76yVNDZ3AinkC6zhTnp3Iu5TPSslJlketySdAQQPp5UTjHvZWhCOW"
       - "traefik.http.routers.https-0-d4o4ww8ockg8c0kgw0sggskc-mastra.middlewares=gzip,mastra-auth"
 
 networks:
