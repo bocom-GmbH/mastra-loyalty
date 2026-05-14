@@ -1,9 +1,14 @@
-# Coolify deploys this stack. Set DATABASE_URL, OPENAI_API_KEY, STUDIO_BASIC_AUTH
-# as environment variables in the Coolify project, and assign the two FQDNs
-# (api.example.com, studio.example.com) in the Coolify UI.
+# Two identical Mastra containers — same image, different Traefik routing.
 #
-# STUDIO_BASIC_AUTH format: "user:$$apr1$$..." (htpasswd, $ doubled for compose).
-# Generate with: htpasswd -nbB admin 'your-password' | sed 's/\$/\$\$/g'
+# - mastra:  API publicly accessible at https://mastra-api.levelling.app
+# - studio:  same image, exposes the Studio UI at https://mastra-studio.levelling.app
+#            and is protected by HTTP Basic Auth via a Traefik middleware.
+#
+# Both connect to the same Postgres (DATABASE_URL).
+#
+# STUDIO_BASIC_AUTH format: "user:$$apr1$$..." (htpasswd output).
+# In the Coolify UI, paste the raw htpasswd output (single $); only double the
+# $ if you ever hand-edit this file outside Coolify.
 
 services:
   mastra:
@@ -19,36 +24,34 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     expose:
       - "4111"
-    labels:
-      # Coolify reads SERVICE_FQDN_* to wire up Traefik + TLS automatically.
-      - coolify.managed=true
-      - "traefik.enable=true"
-      - "traefik.http.services.mastra.loadbalancer.server.port=4111"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 15s
+      start_period: 20s
 
   studio:
     build:
       context: .
-      dockerfile: Dockerfile.studio
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       - mastra
     environment:
-      STUDIO_PORT: 3000
-      STUDIO_SERVER_HOST: mastra
-      STUDIO_SERVER_PORT: 4111
-      STUDIO_SERVER_PROTOCOL: http
+      NODE_ENV: production
+      PORT: 4111
+      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
     expose:
-      - "3000"
+      - "4111"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
     labels:
-      - coolify.managed=true
-      - "traefik.enable=true"
-      - "traefik.http.services.studio.loadbalancer.server.port=3000"
-      # Basic Auth — protege o Studio em produção.
       - "traefik.http.middlewares.studio-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
       - "traefik.http.routers.studio.middlewares=studio-auth@docker"
