@@ -1,16 +1,14 @@
-# Two identical Mastra containers — same image, different Traefik routing.
+# Single Mastra container serving both API and Studio UI.
+# Traefik Basic Auth protects the whole host (UI + API).
 #
-# - mastra:  API publicly accessible at https://mastra-api.levelling.app
-# - studio:  same image, exposes the Studio UI at https://mastra-studio.levelling.app
-#            and is protected by HTTP Basic Auth via a Traefik middleware.
+# To call the API from a client, send:
+#   Authorization: Basic <base64(user:password)>
 #
-# Both connect to the same Postgres (DATABASE_URL). The `coolify` external
-# network is what Coolify-managed databases and Traefik are attached to;
-# joining it lets us resolve the DB by its UUID hostname.
+# STUDIO_BASIC_AUTH = output of `htpasswd -nbB admin 'password'`.
+# Paste the raw output in the Coolify env panel (single $, Coolify escapes it).
 #
-# STUDIO_BASIC_AUTH format: "user:$$apr1$$..." (htpasswd output).
-# In the Coolify UI, paste the raw htpasswd output (single $); only double the
-# $ if you ever hand-edit this file outside Coolify.
+# Network `coolify` is the shared external network where the Coolify-managed
+# Postgres lives — joining it lets DNS resolve the DB by its UUID hostname.
 
 services:
   mastra:
@@ -34,34 +32,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
-
-  studio:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    depends_on:
-      mastra:
-        condition: service_healthy
-    environment:
-      NODE_ENV: production
-      PORT: 4111
-      DATABASE_URL: ${DATABASE_URL}
-      DATABASE_SSL: ${DATABASE_SSL:-false}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-    expose:
-      - "4111"
-    networks:
-      - coolify
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     labels:
-      - "traefik.http.middlewares.studio-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
-      - "traefik.http.routers.studio.middlewares=studio-auth@docker"
+      - "traefik.http.middlewares.mastra-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
+      - "traefik.http.routers.mastra.middlewares=mastra-auth@docker"
 
 networks:
   coolify:
