@@ -1,11 +1,7 @@
 # Single Mastra container serving both API and Studio UI.
-# Traefik Basic Auth protects the whole host (UI + API).
 #
-# To call the API from a client, send:
-#   Authorization: Basic <base64(user:password)>
-#
-# STUDIO_BASIC_AUTH = output of `htpasswd -nbB admin 'password'`.
-# Paste the raw output in the Coolify env panel (single $, Coolify escapes it).
+# Routing (domain, TLS, Host rule) is generated automatically by Coolify
+# from the "Domains" tab — do not declare Traefik routers/services here.
 #
 # Network `coolify` is the shared external network where the Coolify-managed
 # Postgres lives — joining it lets DNS resolve the DB by its UUID hostname.
@@ -32,11 +28,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 180s
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.mastra.loadbalancer.server.port=4111"
-      - "traefik.http.middlewares.mastra-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
-      - "traefik.http.routers.mastra.middlewares=mastra-auth@docker"
 
 networks:
   coolify:
