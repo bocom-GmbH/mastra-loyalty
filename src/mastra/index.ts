@@ -1,0 +1,31 @@
+import { Mastra } from '@mastra/core';
+import { Memory } from '@mastra/memory';
+import { PostgresStore } from '@mastra/pg';
+import { weatherAgent } from './agents/weather-agent';
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL is required');
+}
+
+const storage = new PostgresStore({
+  id: 'pg-storage',
+  connectionString: process.env.DATABASE_URL,
+  schemaName: 'public',
+  ssl:
+    process.env.DATABASE_SSL === 'true'
+      ? { rejectUnauthorized: false }
+      : false,
+  max: 20,
+  idleTimeoutMillis: 30_000,
+});
+
+const memory = new Memory({
+  storage,
+  options: { generateTitle: true },
+});
+
+export const mastra = new Mastra({
+  storage,
+  memory,
+  agents: { weatherAgent },
+});
