@@ -4,7 +4,9 @@
 # - studio:  same image, exposes the Studio UI at https://mastra-studio.levelling.app
 #            and is protected by HTTP Basic Auth via a Traefik middleware.
 #
-# Both connect to the same Postgres (DATABASE_URL).
+# Both connect to the same Postgres (DATABASE_URL). The `coolify` external
+# network is what Coolify-managed databases and Traefik are attached to;
+# joining it lets us resolve the DB by its UUID hostname.
 #
 # STUDIO_BASIC_AUTH format: "user:$$apr1$$..." (htpasswd output).
 # In the Coolify UI, paste the raw htpasswd output (single $); only double the
@@ -24,6 +26,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     expose:
       - "4111"
+    networks:
+      - coolify
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
       interval: 30s
@@ -46,6 +50,8 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     expose:
       - "4111"
+    networks:
+      - coolify
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
       interval: 30s
@@ -55,3 +61,7 @@ services:
     labels:
       - "traefik.http.middlewares.studio-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
       - "traefik.http.routers.studio.middlewares=studio-auth@docker"
+
+networks:
+  coolify:
+    external: true
