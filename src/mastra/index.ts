@@ -1,5 +1,4 @@
 import { Mastra } from '@mastra/core';
-import { Memory } from '@mastra/memory';
 import { PostgresStore } from '@mastra/pg';
 import { weatherAgent } from './agents/weather-agent';
 
@@ -19,13 +18,7 @@ const storage = new PostgresStore({
   idleTimeoutMillis: 30_000,
 });
 
-const memory = new Memory({
-  storage,
-  options: { generateTitle: true },
-});
-
 export const mastra = new Mastra({
   storage,
-  memory,
   agents: { weatherAgent },
 });
