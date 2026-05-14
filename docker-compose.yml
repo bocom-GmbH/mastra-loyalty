@@ -30,10 +30,10 @@ services:
       - coolify
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
-      interval: 30s
+      interval: 15s
       timeout: 5s
-      retries: 3
-      start_period: 20s
+      retries: 5
+      start_period: 120s
 
   studio:
     build:
@@ -55,10 +55,10 @@ services:
       - coolify
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
-      interval: 30s
+      interval: 15s
       timeout: 5s
-      retries: 3
-      start_period: 20s
+      retries: 5
+      start_period: 120s
     labels:
       - "traefik.http.middlewares.studio-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
       - "traefik.http.routers.studio.middlewares=studio-auth@docker"
