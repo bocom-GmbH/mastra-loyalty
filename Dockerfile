@@ -22,8 +22,8 @@ EXPOSE 4111
 ENV PORT=4111
 ENV MASTRA_STUDIO_PATH=/app/.mastra/output/studio
 
-HEALTHCHECK --interval=15s --timeout=5s --start-period=120s --retries=5 \
-  CMD wget -qO- http://127.0.0.1:4111/api/health || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
+  CMD wget -qO- http://127.0.0.1:4111/health || exit 1
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", ".mastra/output/index.mjs"]

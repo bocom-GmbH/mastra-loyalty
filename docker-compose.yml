@@ -29,11 +29,11 @@ services:
     networks:
       - coolify
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/health"]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 120s
+      start_period: 60s
 
   studio:
     build:
@@ -54,11 +54,11 @@ services:
     networks:
       - coolify
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/api/health"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4111/health"]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 120s
+      start_period: 60s
     labels:
       - "traefik.http.middlewares.studio-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
       - "traefik.http.routers.studio.middlewares=studio-auth@docker"
