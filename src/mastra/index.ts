@@ -1,4 +1,5 @@
 import { Mastra } from '@mastra/core';
+import { PinoLogger } from '@mastra/loggers';
 import { PostgresStore } from '@mastra/pg';
 import { weatherAgent } from './agents/weather-agent';
 
@@ -21,4 +22,8 @@ const storage = new PostgresStore({
 export const mastra = new Mastra({
   storage,
   agents: { weatherAgent },
+  logger: new PinoLogger({
+    name: 'Mastra',
+    level: 'info',
+  }),
 });
