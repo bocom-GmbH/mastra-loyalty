@@ -3,6 +3,16 @@
 # Routing (domain, TLS, Host rule) is generated automatically by Coolify
 # from the "Domains" tab — do not declare Traefik routers/services here.
 #
+# Basic Auth is attached to the router Coolify generated. Its name is
+# derived from the Coolify resource UUID; if the UUID changes (resource
+# recreated), update the router name in the middlewares label below.
+# Find the current name on the host with:
+#   docker inspect <container> --format '{{json .Config.Labels}}' | jq | grep routers
+#
+# STUDIO_BASIC_AUTH must be the htpasswd output. In the Coolify env panel
+# use a single $ (Coolify escapes it); only double the $ if editing the
+# compose file directly.
+#
 # Network `coolify` is the shared external network where the Coolify-managed
 # Postgres lives — joining it lets DNS resolve the DB by its UUID hostname.
 
@@ -28,6 +38,9 @@ services:
       timeout: 5s
       retries: 10
       start_period: 180s
+    labels:
+      - "traefik.http.middlewares.mastra-auth.basicauth.users=${STUDIO_BASIC_AUTH}"
+      - "traefik.http.routers.https-0-d4o4ww8ockg8c0kgw0sggskc-mastra.middlewares=gzip,mastra-auth"
 
 networks:
   coolify:
