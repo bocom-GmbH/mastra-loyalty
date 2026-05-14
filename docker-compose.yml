@@ -41,7 +41,8 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - mastra
+      mastra:
+        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: 4111
