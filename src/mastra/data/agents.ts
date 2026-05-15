@@ -1,7 +1,11 @@
 import { openai } from '@ai-sdk/openai';
 import { Agent } from '@mastra/core/agent';
 import type { SubAgent } from '@mastra/core/agent';
+import { Memory } from '@mastra/memory';
 import { describeTableTool, listTablesTool, runQueryTool } from './tools';
+
+// dataAgent uses network() to coordinate sub-agents, which requires memory.
+const dataAgentMemory = new Memory();
 
 export const schemaExplorerAgent = new Agent({
   id: 'schema-explorer-agent',
@@ -57,6 +61,7 @@ Rules:
 - Always respond in English, regardless of the language the user writes in.
 - Keep the final answer concise. Use a short table or list when presenting rows.`,
   model: openai('gpt-4o-mini'),
+  memory: dataAgentMemory,
   agents: {
     'schema-explorer-agent': schemaExplorerAgent as unknown as SubAgent,
     'query-runner-agent': queryRunnerAgent as unknown as SubAgent,

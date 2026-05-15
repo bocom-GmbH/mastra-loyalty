@@ -1,12 +1,17 @@
 import { openai } from '@ai-sdk/openai';
 import { Agent } from '@mastra/core/agent';
 import type { SubAgent } from '@mastra/core/agent';
+import { Memory } from '@mastra/memory';
 import { describeTableTool, listTablesTool, runQueryTool } from '../data/tools';
 import { readGuidelineTool } from './guideline-tool';
 import { auditChecklistTool } from './tools/audit-checklist';
 import { recordWaiverTool } from './tools/record-waiver';
 import { runDdlTool } from './tools/run-ddl';
 import { verifyStateTool } from './tools/verify-state';
+
+// Orchestrators need memory for the network() loop. Leaving `storage` unset
+// makes Memory reuse the Mastra instance's storage (PostgresStore).
+const orchestratorMemory = new Memory();
 
 const CONTRACT_PREAMBLE = `Always respond in English. Before doing anything else on a new task, call read-guideline with doc="general" to load the engine-agnostic execution contract. Then call read-guideline for the engine-specific document that applies (postgres-supabase or sqlite). Do not skip this.`;
 
@@ -214,6 +219,7 @@ For every spec, produce:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool },
+  memory: orchestratorMemory,
   agents: {
     thoth: thothAgent as unknown as SubAgent,
     seshat: seshatAgent as unknown as SubAgent,
@@ -278,6 +284,7 @@ You MAY NOT: execute DDL, design schemas, repair drift. If you find drift, retur
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool, verifyStateTool },
+  memory: orchestratorMemory,
   agents: {
     maat: maatAgent as unknown as SubAgent,
   },
@@ -375,6 +382,7 @@ If a fact is not present in the rulebooks, current database state, or verified r
 Never expose secrets, API keys, passwords, connection strings, or raw credentials.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool },
+  memory: orchestratorMemory,
   agents: {
     chiron: chironAgent as unknown as SubAgent,
     thoth: thothAgent as unknown as SubAgent,
