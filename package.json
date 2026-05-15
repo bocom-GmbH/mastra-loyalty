@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "mastra dev",
-    "build": "mastra build --studio",
+    "build": "mastra build --studio && npm run build:seed",
+    "build:seed": "esbuild src/seed-editor.ts --bundle --platform=node --format=esm --target=node22 --outfile=.mastra/output/seed.mjs --packages=external --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
     "start": "mastra start",
     "studio": "mastra studio",
     "seed": "tsx src/seed-editor.ts",
+    "seed:prod": "node .mastra/output/seed.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

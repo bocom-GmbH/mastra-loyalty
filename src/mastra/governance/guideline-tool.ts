@@ -4,9 +4,6 @@ import { fileURLToPath } from 'node:url';
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const GUIDELINES_DIR = join(HERE, 'guidelines');
-
 const DOC_FILES = {
   general: 'general.md',
   'postgres-supabase': 'postgres-supabase.md',
@@ -15,8 +12,40 @@ const DOC_FILES = {
 
 type DocName = keyof typeof DOC_FILES;
 
+// Resolve the guidelines directory at runtime. Try the source layout first
+// (development with tsx / mastra dev), then the bundled-output layout (after
+// `mastra build` produces .mastra/output/, and the Dockerfile copies the
+// guidelines alongside it).
+const HERE = dirname(fileURLToPath(import.meta.url));
+const CANDIDATE_DIRS = [
+  join(HERE, 'guidelines'),
+  join(HERE, '..', 'governance', 'guidelines'),
+  join(HERE, '..', '..', 'governance', 'guidelines'),
+  join(process.cwd(), 'src', 'mastra', 'governance', 'guidelines'),
+  join(process.cwd(), '.mastra', 'output', 'guidelines'),
+  join(process.cwd(), 'guidelines'),
+];
+
+let resolvedDir: string | undefined;
+
 async function loadDoc(name: DocName): Promise<string> {
-  return await readFile(join(GUIDELINES_DIR, DOC_FILES[name]), 'utf8');
+  if (!resolvedDir) {
+    for (const candidate of CANDIDATE_DIRS) {
+      try {
+        await readFile(join(candidate, DOC_FILES.general), 'utf8');
+        resolvedDir = candidate;
+        break;
+      } catch {
+        // try next
+      }
+    }
+    if (!resolvedDir) {
+      throw new Error(
+        `Could not locate guideline files. Tried: ${CANDIDATE_DIRS.join(', ')}`,
+      );
+    }
+  }
+  return await readFile(join(resolvedDir, DOC_FILES[name]), 'utf8');
 }
 
 function extractSection(doc: string, section: string): string {

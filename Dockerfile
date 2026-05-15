@@ -16,6 +16,9 @@ FROM base AS runtime
 RUN apk add --no-cache dumb-init wget && \
     addgroup -S mastra && adduser -S mastra -G mastra
 COPY --from=build --chown=mastra:mastra /app/.mastra/output ./.mastra/output
+# Markdown guideline files are read at runtime by the read-guideline tool.
+# They live outside the bundled output, so copy them alongside.
+COPY --from=build --chown=mastra:mastra /app/src/mastra/governance/guidelines ./.mastra/output/guidelines
 
 USER mastra
 EXPOSE 4111
