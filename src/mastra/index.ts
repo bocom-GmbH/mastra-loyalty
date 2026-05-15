@@ -1,4 +1,5 @@
 import { Mastra } from '@mastra/core';
+import { MastraEditor } from '@mastra/editor';
 import { PinoLogger } from '@mastra/loggers';
 import { PostgresStore } from '@mastra/pg';
 import { weatherAgent } from './agents/weather-agent';
@@ -27,3 +28,6 @@ export const mastra = new Mastra({
     level: 'info',
   }),
 });
+
+const editor = new MastraEditor();
+editor.registerWithMastra(mastra);
