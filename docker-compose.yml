@@ -12,7 +12,7 @@
 # The Basic Auth htpasswd hash is inlined here. In this Coolify setup
 # the $ must be SINGLE (not the usual $$ Compose escape) — Coolify does
 # not unescape $$ before handing labels to Traefik, so doubling breaks
-# the hash. Generate a new one with `htpasswd -nbB admin 'senha'` and
+# the hash. Generate a new one with `htpasswd -nbB admin 'your-password'` and
 # paste the raw output verbatim. Env vars are not interpolated into
 # Traefik labels in this setup, which is why the value is inlined.
 #
