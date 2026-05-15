@@ -3,6 +3,7 @@ import { MastraEditor } from '@mastra/editor';
 import { PinoLogger } from '@mastra/loggers';
 import { PostgresStore } from '@mastra/pg';
 import { weatherAgent } from './agents/weather-agent';
+import { dataAgent, queryRunnerAgent, schemaExplorerAgent } from './data/agents';
 
 if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL is required');
@@ -22,7 +23,12 @@ const storage = new PostgresStore({
 
 export const mastra = new Mastra({
   storage,
-  agents: { weatherAgent },
+  agents: {
+    weatherAgent,
+    dataAgent,
+    schemaExplorerAgent,
+    queryRunnerAgent,
+  },
   editor: new MastraEditor(),
   logger: new PinoLogger({
     name: 'Mastra',
