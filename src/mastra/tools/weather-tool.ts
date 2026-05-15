@@ -13,17 +13,17 @@ export const weatherTool = createTool({
     windspeed: z.number(),
     description: z.string(),
   }),
-  execute: async ({ context }) => {
-    const geo = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(context.city)}&count=1`,
-    ).then((r) => r.json());
+  execute: async ({ city }) => {
+    const geo = (await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`,
+    ).then((r) => r.json())) as { results?: Array<{ name: string; country: string; latitude: number; longitude: number }> };
 
-    const place = geo?.results?.[0];
-    if (!place) throw new Error(`City not found: ${context.city}`);
+    const place = geo.results?.[0];
+    if (!place) throw new Error(`City not found: ${city}`);
 
-    const weather = await fetch(
+    const weather = (await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current_weather=true`,
-    ).then((r) => r.json());
+    ).then((r) => r.json())) as { current_weather: { temperature: number; windspeed: number } };
 
     const current = weather.current_weather;
     return {
