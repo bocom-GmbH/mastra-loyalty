@@ -11,6 +11,17 @@ FROM deps AS build
 COPY tsconfig.json ./
 COPY src ./src
 RUN npx mastra build --studio
+# Bundle the editor seed script alongside the Mastra output so the container
+# can run `node .mastra/output/seed.mjs` without needing src/ or tsx.
+# Externals reuse the node_modules that `mastra build` already produced.
+RUN npx esbuild src/seed-editor.ts \
+    --bundle \
+    --platform=node \
+    --format=esm \
+    --target=node22 \
+    --outfile=.mastra/output/seed.mjs \
+    --packages=external \
+    --banner:js="import { createRequire } from 'module'; const require = createRequire(import.meta.url);"
 
 FROM base AS runtime
 RUN apk add --no-cache dumb-init wget && \
