@@ -31,6 +31,13 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       DATABASE_SSL: ${DATABASE_SSL:-false}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Read-only Supabase connection used by JANUS and the Data Agent for Q&A.
+      SUPABASE_READONLY_URL: ${SUPABASE_READONLY_URL}
+      SUPABASE_DATA_SSL: ${SUPABASE_DATA_SSL:-true}
+      # Admin Supabase connection used by HEPHAESTUS (run-ddl) and MAAT (record-waiver).
+      # Must point to a role with DDL privileges. Distinct from the read-only URL.
+      SUPABASE_ADMIN_URL: ${SUPABASE_ADMIN_URL}
+      SUPABASE_ADMIN_SSL: ${SUPABASE_ADMIN_SSL:-true}
     expose:
       - "4111"
     networks:
