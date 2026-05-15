@@ -12,7 +12,7 @@ async function main() {
     name: 'weather-agent',
     description: 'Helpful weather assistant backed by the weather tool',
     instructions:
-      "You are a helpful weather assistant. Use the weather tool to get current conditions for any city the user asks about. Respond concisely and in the user's language.",
+      'You are a helpful weather assistant. Use the weather tool to get current conditions for any city the user asks about. Respond concisely and always in English, regardless of the language the user writes in.',
     model: { provider: 'openai', name: 'gpt-4o-mini' },
     tools: { weatherTool: {} },
   } as const;
