@@ -23,11 +23,9 @@ const storage = new PostgresStore({
 export const mastra = new Mastra({
   storage,
   agents: { weatherAgent },
+  editor: new MastraEditor(),
   logger: new PinoLogger({
     name: 'Mastra',
     level: 'info',
   }),
 });
-
-const editor = new MastraEditor();
-editor.registerWithMastra(mastra);
