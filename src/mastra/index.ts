@@ -2,7 +2,6 @@ import { Mastra } from '@mastra/core';
 import { MastraEditor } from '@mastra/editor';
 import { PinoLogger } from '@mastra/loggers';
 import { PostgresStore } from '@mastra/pg';
-import { weatherAgent } from './agents/weather-agent';
 import { dataAgent, queryRunnerAgent, schemaExplorerAgent } from './data/agents';
 import { governanceAgents } from './governance/agents';
 
@@ -25,7 +24,6 @@ const storage = new PostgresStore({
 export const mastra = new Mastra({
   storage,
   agents: {
-    weatherAgent,
     dataAgent,
     schemaExplorerAgent,
     queryRunnerAgent,

@@ -1,5 +1,4 @@
 import type { Agent } from '@mastra/core/agent';
-import { weatherAgent } from './mastra/agents/weather-agent';
 import { dataAgent, queryRunnerAgent, schemaExplorerAgent } from './mastra/data/agents';
 import { mastra } from './mastra';
 import {
@@ -56,6 +55,7 @@ const OBSOLETE_IDS = [
   'migration-executor',
   'post-execution-verifier',
   'waiver-recorder',
+  'weather-agent',
 ];
 
 async function main() {
@@ -63,7 +63,6 @@ async function main() {
   if (!editor) throw new Error('MastraEditor is not configured on this Mastra instance');
 
   const SEEDS = await Promise.all([
-    buildSeed(weatherAgent, { toolKeys: ['weatherTool'] }),
     buildSeed(schemaExplorerAgent, { toolKeys: ['listTablesTool', 'describeTableTool'] }),
     buildSeed(queryRunnerAgent, { toolKeys: ['runQueryTool'] }),
     buildSeed(dataAgent, {
