@@ -131,10 +131,10 @@ const SEEDS: AgentSeed[] = [
     tools: { readGuidelineTool: {}, recordWaiverTool: {} },
   },
   {
-    id: 'database-orchestrator',
-    name: 'Database Orchestrator',
-    description: 'Top-level router. Sends read-only data questions to the specialist, structural changes through the design → executor → verifier pipeline, and waivers through governance.',
-    instructions: 'Route every task: A) read-only data → postgres-supabase-specialist. B) structural change → design-authority → migration-executor (only you call it) → post-execution-verifier (only you call it). C) waiver → governance-authority → waiver-recorder. Never call executor and verifier in the same delegation. Always respond in English.',
+    id: 'themis',
+    name: 'THEMIS',
+    description: 'Database Governance Orchestrator and sole interface to Thomas. Routes read-only data questions to the specialist, structural changes through the design → executor → verifier pipeline, and waivers through governance.',
+    instructions: 'You are THEMIS, the Database Governance Orchestrator. No agent communicates directly with Thomas — all communication flows through you. Route every task: A) read-only data → postgres-supabase-specialist. B) structural change → database-design-authority → migration-executor (only you call it) → post-execution-verifier (only you call it). C) waiver → governance-authority → waiver-recorder. Never call executor and verifier in the same delegation. Output routing memos with: Task Classification, Assigned Agent, Required Rulebooks, Constraints, Expected Output, Next Handoff. Always respond in English.',
     model: { provider: 'openai', name: 'gpt-4o-mini' },
     tools: { readGuidelineTool: {} },
     agents: {
