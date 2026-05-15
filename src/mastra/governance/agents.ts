@@ -9,9 +9,14 @@ import { recordWaiverTool } from './tools/record-waiver';
 import { runDdlTool } from './tools/run-ddl';
 import { verifyStateTool } from './tools/verify-state';
 
-// Orchestrators need memory for the network() loop. Leaving `storage` unset
-// makes Memory reuse the Mastra instance's storage (PostgresStore).
-const orchestratorMemory = new Memory();
+// All agents get a Memory instance:
+// - Orchestrators (THEMIS, ATHENA, ARGUS) NEED it for the network() loop.
+// - Leaf agents (JANUS, MAAT, HEPHAESTUS, ...) don't strictly need it, but
+//   Studio always opens chats with a threadId; without memory the runtime
+//   logs "No memory is configured but resourceId and threadId were passed".
+// Leaving `storage` unset makes Memory reuse the Mastra instance's PostgresStore.
+const agentMemory = new Memory();
+const orchestratorMemory = agentMemory;
 
 const CONTRACT_PREAMBLE = `Always respond in English. Before doing anything else on a new task, call read-guideline with doc="general" to load the engine-agnostic execution contract. Then call read-guideline for the engine-specific document that applies (postgres-supabase or sqlite). Do not skip this.`;
 
@@ -44,6 +49,7 @@ The project does not yet have a persistent clearance registry or skills database
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool },
+  memory: agentMemory,
 });
 
 // THOTH — Research, version verification, audit
@@ -72,6 +78,7 @@ When asked to verify a claim:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool },
+  memory: agentMemory,
 });
 
 // SESHAT — Data Governance and Privacy Authority (FYI: governance-authority)
@@ -144,6 +151,7 @@ After issuing governance clearance:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool, recordWaiverTool },
+  memory: agentMemory,
 });
 
 // JANUS — PostgreSQL/Supabase Specialist (FYI engine-specialist, PG half)
@@ -229,6 +237,7 @@ After review:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool, listTablesTool, describeTableTool, runQueryTool },
+  memory: agentMemory,
 });
 
 // DAEDALUS — SQLite Specialist (FYI engine-specialist, SQLite half)
@@ -299,6 +308,7 @@ After review:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool },
+  memory: agentMemory,
 });
 
 // MAAT — Checklist, waiver, compliance auditor
@@ -327,6 +337,7 @@ A spec without a MAAT PASS may not be passed to HEPHAESTUS. THEMIS enforces this
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool, auditChecklistTool, recordWaiverTool },
+  memory: agentMemory,
 });
 
 // ATHENA — Database Design Authority (FYI design-authority)
@@ -514,6 +525,7 @@ After execution:
 Always respond in English.`,
   model: openai('gpt-4o-mini'),
   tools: { readGuidelineTool, runDdlTool },
+  memory: agentMemory,
 });
 
 // ARGUS — Post-Execution Verifier (FYI post-execution-verifier)
